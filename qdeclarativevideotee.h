@@ -28,6 +28,7 @@ signals:
 
 private slots:
     void updateMediaObject();
+    void removeVideoOutput(QObject *output);
 
 private:
     QObject *m_source;

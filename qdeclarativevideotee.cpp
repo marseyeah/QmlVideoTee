@@ -13,6 +13,7 @@ public:
     TeeSurface() { }
 
     void addVideoOutput(QAbstractVideoSurface *output);
+    void removeVideoOutput(QAbstractVideoSurface *output);
 
     QList<QVideoFrame::PixelFormat> supportedPixelFormats(
             QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle) const;
@@ -107,14 +108,28 @@ void QDeclarativeVideoTee::addVideoOutput(QObject *output)
 {
     QAbstractVideoSurface *out = qobject_cast<QAbstractVideoSurface*>(output);
 
-    if (out)
+    if (out) {
         m_tee->addVideoOutput(out);
+        connect(out, SIGNAL(destroyed(QObject*)), this, SLOT(removeVideoOutput(QObject*)));
+    }
+}
+
+void QDeclarativeVideoTee::removeVideoOutput(QObject *output)
+{
+    QAbstractVideoSurface *out = (QAbstractVideoSurface*)output;
+    m_tee->removeVideoOutput(out);
 }
 
 void TeeSurface::addVideoOutput(QAbstractVideoSurface *output)
 {
     if (!m_outputs.contains(output))
         m_outputs.append(output);
+}
+
+void TeeSurface::removeVideoOutput(QAbstractVideoSurface *output)
+{
+    if (m_outputs.contains(output))
+        m_outputs.removeOne(output);
 }
 
 QList<QVideoFrame::PixelFormat> TeeSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
